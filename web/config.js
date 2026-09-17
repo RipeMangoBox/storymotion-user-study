@@ -1,2 +1,2 @@
 // Empty uses the server serving this page. GitHub Pages may set the API origin.
-window.STUDY_API = 'https://650f4686cc9ccca8c1.gradio.live';
+window.STUDY_API = 'https://639c17f23b1c99b98a.gradio.live';
