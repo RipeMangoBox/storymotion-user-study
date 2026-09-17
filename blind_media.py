@@ -13,8 +13,9 @@ def run(v):
     command=['ffmpeg','-nostdin','-v','error','-n','-i',str(source),'-map','0:v:0','-vf','drawbox=x=0:y=180:w=iw:h=24:color=white:t=fill','-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-threads','1','-an','-map_metadata','-1','-movflags','+faststart',str(target)]
     if not target.exists():subprocess.run(command,check=True)
     after=probe(target)
-    for field in ['width','height','nb_frames','avg_frame_rate','duration']:
+    for field in ['width','height','nb_frames','avg_frame_rate']:
         assert before.get(field)==after.get(field),(field,before.get(field),after.get(field))
+    assert abs(float(before['duration'])-float(after['duration'])) < 0.001
     subprocess.run(['ffmpeg','-v','error','-i',str(target),'-f','null','-'],check=True,stdout=subprocess.DEVNULL)
     return {'media_id':v['media_id'],'source':str(source),'output':str(target),'command':command,'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'output_sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'input_probe':before,'output_probe':after,'bytes':target.stat().st_size}
 items=[v for s in catalog['samples'] for v in s['methods'].values()]

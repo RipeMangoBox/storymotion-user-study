@@ -159,6 +159,6 @@ def index():
 
 @app.get('/{asset}')
 def asset(asset: str):
-    if asset not in ['app.js', 'style.css', 'config.js']:
+    if asset not in ['app.js', 'style.css', 'config.js', 'prompts-zh.js']:
         raise HTTPException(404)
     return FileResponse(ROOT / 'web' / asset, headers={'Cache-Control': 'no-cache'})
