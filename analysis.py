@@ -47,7 +47,13 @@ def export(data,resamples=2000):
     if m=='mainline':continue
     for side in ['A','B']:
      for order in ['given>joint','joint>given']:coverage.setdefault((protocol,stimulus,s['mode'],s['id'],m,side,order),0)
- payloads={'responses':rows,'coverage':[dict(zip(['protocol_version','stimulus_version','task','source_id','baseline_id','storymotion_side','task_order'],k),completed_comparisons=v) for k,v in sorted(coverage.items())],'session_progress':progress,'summary':{'valid_human_participants':sum(not r['is_test'] and r['submitted'] and r['eligibility_status']=='valid' for r in progress),'pending_review_submissions':sum(not r['is_test'] and r['submitted'] and r['eligibility_status']=='pending_review' for r in progress),'bootstrap_resamples':resamples,'interval_method':'participant x source-video crossed bootstrap, product multiplicities, separated by protocol and stimulus','preferences':summary}}
+ coverage_fields=['protocol_version','stimulus_version','task','source_id','baseline_id','storymotion_side','task_order']
+ criterion_counts=collections.Counter((tuple(r[k] for k in coverage_fields),r['criterion'],'NA' if r['outcome']=='U' else 'valid') for r in rows)
+ coverage_rows=[]
+ for key,n in sorted(coverage.items()):
+  criteria=['camera_text','camera_geometry','framing']+(['human_text','human_physics'] if key[2]=='joint' else [])
+  coverage_rows.append(dict(zip(coverage_fields,key),completed_comparisons=n,valid_by_criterion={q:criterion_counts[(key,q,'valid')] for q in criteria},NA_by_criterion={q:criterion_counts[(key,q,'NA')] for q in criteria}))
+ payloads={'responses':rows,'coverage':coverage_rows,'session_progress':progress,'summary':{'valid_human_participants':sum(not r['is_test'] and r['submitted'] and r['eligibility_status']=='valid' for r in progress),'pending_review_submissions':sum(not r['is_test'] and r['submitted'] and r['eligibility_status']=='pending_review' for r in progress),'bootstrap_resamples':resamples,'interval_method':'participant x source-video crossed bootstrap, product multiplicities, separated by protocol and stimulus','preferences':summary}}
  for name,obj in payloads.items():(out/(name+'.json')).write_text(json.dumps(obj,indent=2,ensure_ascii=False))
  lines=['# User study results','', '| Protocol | Stimulus | Task | Baseline | Criterion | N | W | T | L | NA | Preference | 95% CI |','|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---|']
  for r in summary:

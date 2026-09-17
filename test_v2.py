@@ -29,6 +29,11 @@ with tempfile.TemporaryDirectory(prefix='study-v2-test-') as tmp:
      cells[(mode,t['key'],baseline,t['methods'][0]=='mainline',order)]+=1
  assert collections.Counter(starts)=={'given':24,'joint':24}
  assert all(v==(2 if k[0]=='given' else 6) for k,v in cells.items())
+ # Cached v1 frontend keeps given-first order and its original answer schema.
+ legacy=client.post('/api/start',json={'language':'en','consent':True,'test_key':'isolated-test-key'}).json()
+ assert legacy['protocol_version']=='paired-40-v1'
+ assert [t['mode'] for t in legacy['trials']]==['given']*20+['joint']*20
+ assert client.put('/api/answers/0',headers={'Authorization':'Bearer '+legacy['token']},json={'ratings':{q:'0' for q in legacy['trials'][0]['questions']},'watched':[True,True],'elapsed':5}).status_code==200
  for s in sessions[:2]:
   headers={'Authorization':'Bearer '+s['token']}
   assert client.post('/api/submit',headers=headers).status_code==400
@@ -49,4 +54,5 @@ with tempfile.TemporaryDirectory(prefix='study-v2-test-') as tmp:
  with server.connect() as c:c.execute("UPDATE answers SET ratings=replace(ratings, '\"0\"', '\"na\"')")
  result=export(data,50)
  assert all(r['preference_including_ties'] is None and r['NA_fraction']==1 for r in result['summary']['preferences'])
+ assert all(not any(r['valid_by_criterion'].values()) for r in result['coverage'])
  print(json.dumps({'passed':True,'slots':48,'task_order':[24,24],'complete_test_sessions':2,'paired_cells':len(cells),'checks':['idempotent start','coverage gate','complete-only submission','idempotent submit','test exclusion','pending review exclusion','ties','NA','zero coverage cells']}))

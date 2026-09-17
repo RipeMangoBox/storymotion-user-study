@@ -16,7 +16,7 @@ async function routes(page){
  if(process.env.LOCAL_MEDIA_ROUTE)await page.route('**/media/*',route=>route.fulfill({contentType:'video/mp4',body:fs.readFileSync(localMedia[route.request().url().split('/').pop()])}));
 }
 (async()=>{
- const browser=await chromium.launch({headless:true,executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'});
+ const browser=await chromium.launch({headless:true,executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',...(process.env.TEST_PROXY?{proxy:{server:process.env.TEST_PROXY,bypass:'localhost,127.0.0.1'}}:{})});
  const results=[];
  for(const first of ['given','joint']){
   let s;
