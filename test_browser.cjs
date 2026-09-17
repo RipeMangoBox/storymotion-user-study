@@ -8,7 +8,7 @@ const key=fs.readFileSync('runtime/test.key','utf8').trim();
  if(!start.ok)throw Error('start '+start.status);
  const s=await start.json();
  if(s.trials.length!==40||!s.is_test||s.trials.slice(0,20).some(t=>t.mode!=='given')||s.trials.slice(20).some(t=>t.mode!=='joint'))throw Error('cohort');
- const browser=await chromium.launch({headless:true,executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'});
+ const browser=await chromium.launch({headless:true,executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',...(process.env.TEST_PROXY?{proxy:{server:process.env.TEST_PROXY,bypass:'localhost,127.0.0.1'}}:{})});
  const page=await browser.newPage({viewport:{width:1360,height:1050}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(BASE,{waitUntil:'domcontentloaded'});
