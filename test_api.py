@@ -20,7 +20,9 @@ for _ in range(6):
     assert code==200
     session=json.loads(data);sessions.append(session)
     assert session['is_test'] and len(session['trials'])==40
-    assert [r['mode'] for r in session['trials']]==['given']*20+['joint']*20
+    assert {session['trials'][0]['mode'],session['trials'][20]['mode']}=={'given','joint'}
+    assert all(t['mode']==session['trials'][0]['mode'] for t in session['trials'][:20])
+    assert all(t['mode']==session['trials'][20]['mode'] for t in session['trials'][20:])
     assert 'mainline' not in data.decode() and 'pulp_dit' not in data.decode()
 token=sessions[0]['token']
 assert request('/api/submit','POST',token=token)[0]==400

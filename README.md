@@ -1,24 +1,30 @@
 # Paired Motion–Camera Study
 
-Bilingual, anonymous A/B video questionnaire: 20 given-human camera trials, a transition page, then 20 joint human–camera trials. No ground-truth videos are included. English experimental prompts are preserved in both interface languages.
+Bilingual, blinded A/B questionnaire with 20 given-human camera and 20 joint human–camera comparisons. Each source pairs StoryMotion with one baseline; no ground truth is shown. See [PROTOCOL.md](PROTOCOL.md) for frozen questions, allocation and analysis rules.
 
-## Design
+## Pilot v2
 
-- Given-human: camera–text alignment, camera movement coherence/plausibility, and camera-view framing.
-- Joint: the same camera criteria plus human–text alignment and human motion naturalness/physical plausibility.
-- Five comparative choices (A much/slightly better, equal, B slightly/much better), plus cannot judge.
-- StoryMotion versus one baseline per sample. Baselines are cyclically counterbalanced by sample and session; within each task A/B has ten StoryMotion-left and ten StoryMotion-right trials. Trial order is randomized within each task, never across task boundaries. Abandonment can unbalance completed-response counts, which should be inspected before analysis.
-- Camera-only supplied human motion is not rated. Both synchronized replay and independent inspection are supported; the browser requires full playback before advancing.
-- Responses are saved after each trial, with local draft recovery. Final submission is complete-only and idempotent. Test and incomplete sessions are excluded from the reporting CLI.
+- Task order is counterbalanced independently of opponent allocation through a 48-slot template, with ten StoryMotion-left and ten StoryMotion-right trials per task.
+- Five preference levels plus a separate unable-to-judge option; camera text alignment, movement quality and framing in both tasks, plus human text alignment and quality in joint.
+- Shared buffering, synchronized replay/pause, drift correction, 90% played-coverage gates, draft recovery, idempotent start and final submission.
+- Test sessions use a separate allocation pool and browser storage. Open `?test=1` and supply a private test credential; none is published.
+- Existing version-1 sessions retain their original questionnaire and stimulus snapshot. New video renders require new stimulus identifiers.
+- Current rendered outputs are a manually selected pilot cohort. Blender replacements and neutral practice videos are pending; do not describe these results as a random full-test evaluation.
 
-## Running
+## Deployment
 
-Install `requirements.txt`. `prepare.py` freezes the current selected gallery into a private `runtime/catalog.json`; videos remain in their original location. Run `python launch.py` for the server, or set `STUDY_SHARE=1` to start a **temporary Gradio share tunnel (one-week lifetime)**. Runtime files and response databases must not be published.
+Install `requirements.txt`; keep `runtime/` private. `prepare.py` freezes gallery inputs. `python launch.py` serves the API; `STUDY_SHARE=1` enables a temporary share tunnel. GitHub Pages hosts `web/`; `web/config.js` selects the API.
 
-For GitHub Pages, publish `web/` and set `web/config.js` to the API origin. Pages hosts only the frontend; it does not store answers. A temporary tunnel supports pilot testing, not unattended long-term recruitment. Use a stable HTTPS backend for longer collection.
+A temporary tunnel is not permanent study hosting. Provision a stable HTTPS backend before extended recruitment. Preserve the response database, archived catalogs, media and resume credentials across updates.
 
-## Private statistics
+## Private analysis
 
-`python report.py` exports completed real responses and per-task/per-baseline/per-criterion descriptive preferences to `runtime/exports/`. It does not expose an unauthenticated results API. Do not treat repeated judgments as independent observations for significance testing. The videos form a manually selected cohort, not a random sample of the full test set. Existing render processing is retained, including any method-specific visualization smoothing; this questionnaire does not establish an unprocessed-motion comparison.
+Submissions remain pending eligibility review. Use `review_session.py` to mark documented eligible human responses; retain all original answers. Do not exclude based on preferences or to force balanced cells.
 
-The service stores no names, emails, or IP addresses in its database. Session credentials are stored hashed server-side. The hosting/network provider may separately maintain network logs. Public video stimuli should be treated as downloadable, not confidential. Formal recruitment remains subject to the research team's applicable ethics and consent requirements.
+`python report.py` writes anonymous observations, coverage including missing cells, progress, and per-task/opponent/criterion statistics to private `runtime/exports/`. It reports W/T/L, NA, tie-inclusive preference and crossed participant/source-video bootstrap intervals. Protocol and stimulus versions remain separate.
+
+The database contains no names, emails or IP addresses. Hosting providers may maintain their own network logs. Formal recruitment requires the research team's applicable consent and ethics process. Public stimuli are downloadable, not confidential.
+
+## Checks
+
+`python test_v2.py` uses an isolated synthetic database to verify allocation, idempotency, gates and scoring. `node test_browser_v2.cjs` exercises both task orders and actual video playback with explicitly marked test sessions.
