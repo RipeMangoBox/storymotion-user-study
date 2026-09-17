@@ -10,9 +10,9 @@ with tempfile.TemporaryDirectory(prefix='study-v2-test-') as tmp:
  from analysis import export
  client=TestClient(server.app)
  sessions=[];cells=collections.Counter();starts=[]
- assert client.post('/api/start',json={'language':'en','consent':True,'test_mode':True}).status_code==403
+ assert client.post('/api/start',json={'language':'en','consent':True,'protocol_version':'paired-40-v2','test_mode':True}).status_code==403
  for i in range(48):
-  request={'language':'en','consent':True,'test_mode':True,'test_key':'isolated-test-key','request_id':f'{i:064x}'}
+  request={'language':'en','consent':True,'protocol_version':'paired-40-v2','test_mode':True,'test_key':'isolated-test-key','request_id':f'{i:064x}'}
   r=client.post('/api/start',json=request);assert r.status_code==200,r.text
   s=r.json();sessions.append(s);assert s['is_test'] and s['protocol_version']=='paired-40-v2'
   assert client.post('/api/start',json=request).json()['token']==s['token']

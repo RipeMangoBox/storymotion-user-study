@@ -16,7 +16,7 @@ assert request('/api/session')[0]==401
 assert request('/api/start','POST',{'language':'en','consent':False})[0]==400
 sessions=[]
 for _ in range(6):
-    code,data,_=request('/api/start','POST',{'language':'en','consent':True,'test_key':key})
+    code,data,_=request('/api/start','POST',{'language':'en','consent':True,'protocol_version':'paired-40-v2','test_key':key})
     assert code==200
     session=json.loads(data);sessions.append(session)
     assert session['is_test'] and len(session['trials'])==40

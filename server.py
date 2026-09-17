@@ -103,6 +103,7 @@ class Start(BaseModel):
     test_key: str = ''
     request_id: str = Field(default='', pattern='^([a-f0-9]{64})?$')
     test_mode: bool = False
+    protocol_version: str = Field(default='paired-40-v1',pattern='^paired-40-v[12]$')
 
 @app.get('/api/health')
 def health():
@@ -138,7 +139,12 @@ def start(payload: Start):
         scores={s:sum(v) for s,v in counts.items()}
         slot=rng.choice([s for s,v in scores.items() if v==min(scores.values())])
         plan=make_plan(slot,rng)
-        cursor = c.execute('INSERT INTO sessions(token,created,language,is_test,plan,protocol_version,stimulus_version,assignment_slot) VALUES(?,?,?,?,?,?,?,?)', (token_digest, time.time(), payload.language, int(is_test), json.dumps(plan),PROTOCOL,CATALOG['version'],slot))
+        if payload.protocol_version=='paired-40-v1':
+            n=c.execute('SELECT COUNT(*) FROM sessions WHERE protocol_version=? AND is_test=?',(payload.protocol_version,int(is_test))).fetchone()[0]
+            plan=make_plan(n%48,rng)
+            plan.sort(key=lambda p:p['key'].endswith(':joint'))
+            slot=None
+        cursor = c.execute('INSERT INTO sessions(token,created,language,is_test,plan,protocol_version,stimulus_version,assignment_slot) VALUES(?,?,?,?,?,?,?,?)', (token_digest, time.time(), payload.language, int(is_test), json.dumps(plan),payload.protocol_version,CATALOG['version'],slot))
         row = c.execute('SELECT * FROM sessions WHERE id=?', (cursor.lastrowid,)).fetchone()
     return {'token': token, **public_session(row)}
 

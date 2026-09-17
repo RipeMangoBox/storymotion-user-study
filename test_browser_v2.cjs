@@ -21,7 +21,7 @@ async function routes(page){
  for(const first of ['given','joint']){
   let s;
   for(let i=0;i<100;i++){
-   const r=await fetch(API+'/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:'zh',consent:true,test_mode:true,test_key:key})});
+   const r=await fetch(API+'/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:'zh',consent:true,protocol_version:'paired-40-v2',test_mode:true,test_key:key})});
    if(!r.ok)throw Error(await r.text());s=await r.json();if(s.trials[0].mode===first)break;
   }
   if(s.trials[0].mode!==first)throw Error('missing task order');
@@ -56,7 +56,7 @@ async function routes(page){
  // Mobile layout and shared playback, including a one-sided readiness stall.
  const context=await browser.newContext({viewport:{width:390,height:844}});const page=await context.newPage();
  await routes(page);
- const s=await fetch(API+'/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:'en',consent:true,test_mode:true,test_key:key})}).then(r=>r.json());
+ const s=await fetch(API+'/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:'en',consent:true,protocol_version:'paired-40-v2',test_mode:true,test_key:key})}).then(r=>r.json());
  await page.goto(BASE+'/?test=1');await page.evaluate(t=>{localStorage.setItem('motion-camera-study-v1-test-token',t);localStorage.setItem('motion-camera-study-v1-test-tutorial',t);},s.token);await page.reload();await page.waitForSelector('#video-0');
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('horizontal overflow');
  await page.screenshot({path:'runtime/v2-mobile.png',fullPage:true});
