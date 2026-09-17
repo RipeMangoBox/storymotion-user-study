@@ -7,6 +7,7 @@ const key=fs.readFileSync('runtime/test.key','utf8').trim();
  const start=await fetch(API+'/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:'zh',consent:true,test_key:key})});
  if(!start.ok)throw Error('start '+start.status);
  const s=await start.json();
+ fs.writeFileSync('runtime/qa-session.json',JSON.stringify(s),{mode:0o600});
  if(s.trials.length!==40||!s.is_test||s.trials.slice(0,20).some(t=>t.mode!=='given')||s.trials.slice(20).some(t=>t.mode!=='joint'))throw Error('cohort');
  const browser=await chromium.launch({headless:true,executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',...(process.env.TEST_PROXY?{proxy:{server:process.env.TEST_PROXY,bypass:'localhost,127.0.0.1'}}:{})});
  const page=await browser.newPage({viewport:{width:1360,height:1050}});
@@ -20,7 +21,8 @@ const key=fs.readFileSync('runtime/test.key','utf8').trim();
    await page.waitForSelector('#video-0');
    await page.evaluate(()=>document.querySelectorAll('video').forEach(v=>v.playbackRate=3));
    await page.locator('#replay').click();
-   await page.waitForFunction(()=>[...document.querySelectorAll('.video-status')].every(e=>['已观看','Watched'].includes(e.textContent)),{},{timeout:90000});
+   try { await page.waitForFunction(()=>[...document.querySelectorAll('.video-status')].every(e=>['已观看','Watched'].includes(e.textContent)),{},{timeout:60000}); }
+   catch(e) { await page.screenshot({path:'runtime/playback-failure.png',fullPage:true});console.log(await page.evaluate(()=>[...document.querySelectorAll('video')].map(v=>({src:v.currentSrc,time:v.currentTime,duration:v.duration,ready:v.readyState,error:v.error?.message,played:Array.from({length:v.played.length},(_,j)=>[v.played.start(j),v.played.end(j)])}))));throw e; }
    await page.evaluate(()=>document.querySelectorAll('fieldset').forEach(f=>{const r=f.querySelector('input[value="0"]');r.click();}));
    if(i===0){await page.screenshot({path:'runtime/given.png',fullPage:true});await page.locator('#language').click();await page.screenshot({path:'runtime/given-en.png',fullPage:true});}
    if(i===20){await page.screenshot({path:'runtime/joint.png',fullPage:true});}
