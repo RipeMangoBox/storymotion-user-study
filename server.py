@@ -11,7 +11,7 @@ DATA = Path(os.environ.get('STUDY_DATA', ROOT / 'runtime'))
 DATA.mkdir(parents=True, exist_ok=True)
 CATALOG = json.loads((DATA / 'catalog.json').read_text())
 SAMPLES = {s['id'] + ':' + s['mode']: s for s in CATALOG['samples']}
-MEDIA = {v['media_id']: v['path'] for s in SAMPLES.values() for v in s['methods'].values()}
+MEDIA = {v['media_id']: str(DATA / 'blind_media' / (v['media_id'] + '.mp4')) for s in SAMPLES.values() for v in s['methods'].values()}
 CAMERA = ['camera_text', 'camera_geometry', 'framing']
 HUMAN = ['human_text', 'human_physics']
 DB = DATA / 'responses.sqlite3'
