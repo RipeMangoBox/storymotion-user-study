@@ -27,7 +27,7 @@ function render(){chrome();stopVideos();const app=$('#app');
 if(page==='welcome'){
 app.innerHTML=`<section class="welcome"><div class="eyebrow">PERCEPTION STUDY / 40 COMPARISONS</div><h1>${t('title')}</h1><p class="lead">${t('intro')}</p><div class="steps"><div class="card"><div class="number">01</div><h2>${t('given')}</h2><p>${t('givenIntro')}</p></div><div class="card"><div class="number">02</div><h2>${t('joint')}</h2><p>${t('jointIntro')}</p></div></div><p>${t('flow')}</p><p>${t('how')}</p><div class="card muted">${t('privacy')}</div><label class="consent"><input id="consent" type="checkbox" ${consent?'checked':''}><span>${t('consent')}</span></label><button id="start" class="primary" ${consent?'':'disabled'}>${t('start')} →</button></section>`;
 if(testMode){const note=document.createElement('p');note.className='scope';note.textContent=t('testWelcome');app.prepend(note);if(!sessionStorage.getItem('study-test-key')){$('#start').disabled=true;const input=document.createElement('input');input.type='password';input.placeholder='Test access key / 测试凭证';input.autocomplete='off';input.onchange=()=>sessionStorage.setItem('study-test-key',input.value);app.querySelector('.welcome').prepend(input);}}
-$('#consent').onchange=e=>{consent=e.target.checked;$('#start').disabled=!consent;};$('#start').onclick=start;return;
+$('#consent').onchange=e=>{consent=e.target.checked;$('#start').disabled=!consent;};$('#start').onclick=()=>{const input=app.querySelector('input[type=password]');if(input)sessionStorage.setItem('study-test-key',input.value.trim());start();};return;
 }
 if(page==='transition'){
 const nextMode=session.trials[20].mode;

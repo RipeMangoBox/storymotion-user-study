@@ -7,7 +7,11 @@ def req(path,method='GET',body=None,token=None,headers=None):
     h={'Content-Type':'application/json',**(headers or {})}
     if token:h['Authorization']='Bearer '+token
     r=urllib.request.Request(BASE+path,method=method,headers=h,data=json.dumps(body).encode() if body is not None else None)
-    with urllib.request.urlopen(r,timeout=40) as x:return x.status,x.read(),x.headers
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(r,timeout=20) as x:return x.status,x.read(),x.headers
+        except (OSError,urllib.error.URLError):
+            if attempt==2:raise
 health=json.loads(req('/api/health')[1]);assert health['version']=='blender-v3-20260919'
 body=dict(language='zh',consent=True,test_mode=True,test_key=(ROOT/'test.key').read_text().strip(),protocol_version='paired-40-v2',request_id=secrets.token_hex(32))
 s=json.loads(req('/api/start','POST',body)[1]);assert s['is_test'] and s['version']==health['version']
