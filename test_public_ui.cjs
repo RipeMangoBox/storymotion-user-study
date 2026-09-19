@@ -17,7 +17,7 @@ const API = fs.readFileSync('web/config.js', 'utf8').match(/https:\/\/[^']+/)[0]
     const context=await browser.newContext();const page=await context.newPage();const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto(BASE+'?test=1');
-    await page.evaluate(token=>localStorage.setItem('motion-camera-study-v1-test-token',token),s.token);
+    await page.evaluate(token=>localStorage.setItem('motion-camera-study-blender-v3-test-token',token),s.token);
     await page.reload();await page.locator('#tutorial-next').click();
     await page.waitForSelector('#video-0');
     await page.evaluate(()=>document.querySelectorAll('video').forEach(v=>v.playbackRate=4));
