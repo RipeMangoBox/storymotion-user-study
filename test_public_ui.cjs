@@ -4,7 +4,7 @@ const fs = require('fs');
 const BASE = 'https://ripemangobox.github.io/storymotion-user-study/';
 const API = fs.readFileSync('web/config.js', 'utf8').match(/https:\/\/[^']+/)[0];
 (async () => {
-  const browser = await chromium.launch({headless:true, executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'});
+  const browser = await chromium.launch({headless:true, executablePath:'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',...(process.env.TEST_PROXY?{proxy:{server:process.env.TEST_PROXY}}:{})});
   const checked=[];
   for(const mode of ['given','joint']) {
     let s;
