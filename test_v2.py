@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory(prefix='study-v2-test-') as tmp:
      mode=t['key'].rsplit(':',1)[1];baseline=next(m for m in t['methods'] if m!='mainline')
      cells[(mode,t['key'],baseline,t['methods'][0]=='mainline',order)]+=1
  assert collections.Counter(starts)=={'given':24,'joint':24}
- assert all(v==(2 if k[0]=='given' else 6) for k,v in cells.items())
+ assert all(v==48//(4*(len(next(s for s in server.CATALOG['samples'] if s['mode']==k[0])['methods'])-1)) for k,v in cells.items())
  # Cached v1 frontend keeps given-first order and its original answer schema.
  legacy=client.post('/api/start',json={'language':'en','consent':True,'test_key':'isolated-test-key'}).json()
  assert legacy['protocol_version']=='paired-40-v1'

@@ -1,28 +1,27 @@
-# Paired comparison protocol v2 (pilot)
+# Paired comparison protocol v2 — Blender v3 stimuli
 
 ## Cohort and judgments
 
 The fixed manually selected cohort contains 20 given-human and 20 joint sources.
-Given compares StoryMotion against CCD, CCD-H, DanceCamera3D, DIRECTOR,
-GenDoP and GenDoP-H. Joint compares it against PulpMotion DiT and MAR.
+Given compares StoryMotion against CCD, DanceCamera3D and DIRECTOR-C.
+Joint compares it against PulpMotion DiT and MAR.
 Each participant sees one opponent per source: 40 comparisons and 160 judgments.
 No ground truth is shown. Conclusions apply to these selected stimuli, not a
 randomly sampled full test population or intensity-control evaluation.
 
-The current Python-rendered stimuli remain a pilot. Blender replacements and
-two neutral, unscored video exercises are pending. Textual orientation concepts
-are supplied now, but are not a substitute for testing those practice videos.
-Existing joint StoryMotion previews declare display smoothing. The new renderer
-must establish consistent processing, readable human views and a common spatial
-view per source before the new stimulus version is frozen. Do not overwrite
-videos used by an existing session.
+The author approved all Blender v3 renders on 19 September 2026. Both Camera
+and Spatial views are included in every result. Textual orientation concepts
+are supplied; two neutral unscored video exercises and measured human-pilot
+completion statistics remain pending. Approved rendering is reused without
+additional motion smoothing. Old Python stimuli and answers are preserved
+under their original stimulus version and are not pooled with the new release.
 
 ## Assignment
 
 The 48-slot template crosses task order, source, opponent and presentation side.
 Each participant sees StoryMotion on the left and right ten times per task.
 Across 48 complete slots, task order is split 24/24. Each given
-source/opponent/side/order cell has two observations, each joint cell six.
+source/opponent/side/order cell has four observations, each joint cell six.
 This is an assignment template, not a fixed recruitment or power requirement.
 
 New sessions select randomly among least occupied slots. Completed responses

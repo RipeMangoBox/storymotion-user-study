@@ -1,7 +1,7 @@
 'use strict';
 const $ = s => document.querySelector(s);
 const API = window.STUDY_API || '';
-const K = 'motion-camera-study-v1';
+const K = 'motion-camera-study-blender-v3';
 const testMode=new URLSearchParams(location.search).get('test')==='1';
 const SESSION_K=testMode?K+'-test':K;
 let lang = localStorage.getItem(K+'-lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');

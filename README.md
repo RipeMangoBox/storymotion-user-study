@@ -2,14 +2,16 @@
 
 Bilingual, blinded A/B questionnaire with 20 given-human camera and 20 joint human–camera comparisons. Each source pairs StoryMotion with one baseline; no ground truth is shown. See [PROTOCOL.md](PROTOCOL.md) for frozen questions, allocation and analysis rules.
 
-## Pilot v2
+## Approved Blender v3 release
+
+See [RELEASE_V3.md](RELEASE_V3.md) for the current media version and collection status. The question protocol remains v2.
 
 - Task order is counterbalanced independently of opponent allocation through a 48-slot template, with ten StoryMotion-left and ten StoryMotion-right trials per task.
 - Five preference levels plus a separate unable-to-judge option; camera text alignment, movement quality and framing in both tasks, plus human text alignment and quality in joint.
 - Shared buffering, synchronized replay/pause, drift correction, 90% played-coverage gates, draft recovery, idempotent start and final submission.
 - Test sessions use a separate allocation pool and browser storage. Open `?test=1` and supply a private test credential; none is published.
 - Existing version-1 sessions retain their original questionnaire and stimulus snapshot. New video renders require new stimulus identifiers.
-- Current rendered outputs are a manually selected pilot cohort. Blender replacements and neutral practice videos are pending; do not describe these results as a random full-test evaluation.
+- The author-approved Blender v3 outputs are a manually selected cohort. Given opponents are CCD, DanceCamera3D and DIRECTOR-C; joint opponents are PulpMotion DiT and MAR. Neutral practice videos and a measured human pilot remain pending; do not describe this cohort as a random full-test evaluation.
 
 ## Deployment
 

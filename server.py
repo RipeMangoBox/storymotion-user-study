@@ -107,7 +107,7 @@ class Start(BaseModel):
 
 @app.get('/api/health')
 def health():
-    return {'ok': True, 'version': CATALOG['version'], 'protocol_version':PROTOCOL,'phase':'pilot', 'given': 20, 'joint': 20}
+    return {'ok': True, 'version': CATALOG['version'], 'protocol_version':PROTOCOL,'phase':'open', 'given': 20, 'joint': 20}
 
 @app.post('/api/start')
 def start(payload: Start):
