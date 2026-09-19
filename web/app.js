@@ -16,14 +16,30 @@ for(const l of ['zh','en'])Object.assign(dict[l],window.STUDY_V2[l]);
 dict.zh.how='先观看两侧视频，再独立回答各题。空格可同步播放或暂停，支持从头重播。上方为 Camera view，下方为 Spatial view。';
 dict.en.how='Watch both videos, then judge each criterion independently. Space plays or pauses both; synchronized replay is available. The top panel is Camera view and the bottom panel is Spatial view.';
 const t = key => dict[lang][key];
-function promptText(text){const zh=window.PROMPTS_ZH?.[text];return lang==='zh'&&zh?esc(zh)+'<br><small class="help">'+esc(text)+'</small>':esc(text);}
+function promptText(text){const zh=window.PROMPTS_ZH?.[text];return esc(lang==='zh'&&zh?zh:text);}
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function notice(msg){$('#notice').textContent=msg;$('#notice').hidden=false;setTimeout(()=>$('#notice').hidden=true,testMode?300000:15000);}
 async function call(path,method='GET',body){const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);try{const r=await fetch(API+path,{method,signal:controller.signal,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});if(!r.ok){if(testMode)notice('Test request: HTTP '+r.status);throw new Error('HTTP '+r.status);}return r.json();}finally{clearTimeout(timeout);}}
 function persist(){if(!session)return;localStorage.setItem(SESSION_K+'-draft',JSON.stringify({token,index,ratings,watched,coverage,elapsed:(Date.now()-began)/1000}));}
 function stopVideos(){player?.destroy();player=null;document.querySelectorAll('video').forEach(v=>v.pause());}
 function chrome(){document.documentElement.lang=lang;$('#language').textContent=lang==='zh'?'English':'中文';$('#footer').textContent=t('footer');}
+function fitTrial(){
+ if(page!=='trial'||innerWidth<760)return;
+ const video=$('#video-0');if(!video)return;
+ const occupied=document.querySelector('header').getBoundingClientRect().height+$('#app').getBoundingClientRect().height;
+ const available=innerHeight-occupied+video.getBoundingClientRect().height-12;
+ $('#app').style.setProperty('--media-height',Math.max(170,Math.min(340,Math.floor(available)))+'px');
+}
+function ratingMatrix(trial){
+ $('.prompt-note')?.remove();
+ $('.questions').innerHTML=`<div class="rating-head" aria-hidden="true"><span>${t('criterionLabel')}</span>${t('options').map(v=>`<span>${esc(v)}</span>`).join('')}</div>${trial.questions.map(q=>`<fieldset class="rating-row"><legend class="sr-only">${esc(t('questions')[q][0])}</legend><details class="criterion"><summary>${esc(t('shortQuestions')[q])}</summary><p>${esc(t('questions')[q][1])}</p></details><div class="choices">${['-2','-1','0','1','2','na'].map((v,i)=>`<label class="choice"><input type="radio" name="${q}" value="${v}" ${ratings[q]===v?'checked':''}><span class="choice-dot" aria-hidden="true"></span><span class="choice-text">${esc(t('options')[i])}</span></label>`).join('')}</div></fieldset>`).join('')}`;
+ document.querySelectorAll('.criterion').forEach(el=>el.addEventListener('toggle',()=>requestAnimationFrame(fitTrial)));
+ requestAnimationFrame(fitTrial);
+ document.fonts.ready.then(fitTrial);
+}
+window.addEventListener('resize',()=>requestAnimationFrame(fitTrial));
 function render(){chrome();stopVideos();const app=$('#app');
+document.body.classList.toggle('trial-page',page==='trial');
 if(page==='welcome'){
 app.innerHTML=`<section class="welcome"><div class="eyebrow">PERCEPTION STUDY / 40 COMPARISONS</div><h1>${t('title')}</h1><p class="lead">${t('intro')}</p><div class="steps"><div class="card"><div class="number">01</div><h2>${t('given')}</h2><p>${t('givenIntro')}</p></div><div class="card"><div class="number">02</div><h2>${t('joint')}</h2><p>${t('jointIntro')}</p></div></div><p>${t('flow')}</p><p>${t('how')}</p><div class="card muted">${t('privacy')}</div><label class="consent"><input id="consent" type="checkbox" ${consent?'checked':''}><span>${t('consent')}</span></label><button id="start" class="primary" ${consent?'':'disabled'}>${t('start')} →</button></section>`;
 if(testMode){const note=document.createElement('p');note.className='scope';note.textContent=t('testWelcome');app.prepend(note);if(!sessionStorage.getItem('study-test-key')){$('#start').disabled=true;const input=document.createElement('input');input.type='password';input.placeholder='Test access key / 测试凭证';input.autocomplete='off';input.onchange=()=>sessionStorage.setItem('study-test-key',input.value);app.querySelector('.welcome').prepend(input);}}
@@ -43,6 +59,7 @@ app.innerHTML=`<section class="welcome"><div class="success-icon">✓</div><div 
 }
 const trial=session.trials[index];const part=Math.floor(index/20)+1;
 app.innerHTML=`<div class="progress-row"><span class="eyebrow">${t('part')} ${part} / 2 · ${t(trial.mode)}</span><span class="badge">${t('trial')} ${index%20+1} / 20 · ${t('total')} ${index+1} / 40</span></div><div class="progress-track"><div class="progress-fill" style="width:${index/40*100}%"></div></div>${session.is_test?`<p class="help">${t('test')}</p>`:''}<div class="scope">${t(trial.mode+'Scope')}</div><div class="prompts"><div class="prompt"><strong>${t('humanPrompt')}</strong><span>${promptText(trial.human_text)}</span></div><div class="prompt"><strong>${t('cameraPrompt')}</strong><span>${promptText(trial.camera_text)}</span></div></div><p class="help prompt-note">${t('promptNote')}</p><div class="study-grid"><div class="view-column"><div class="videos">${trial.videos.map((src,i)=>`<div class="video-card"><div class="video-label"><span>${i?'B':'A'}</span><span class="video-status" id="watched-${i}">${t(watched[i]?'watched':'unwatched')}</span></div><video id="video-${i}" aria-label="Video ${i?'B':'A'}" muted playsinline preload="auto" src="${esc(API+src)}"></video><p class="help view-labels">${t('viewLabels')}</p></div>`).join('')}</div><div class="playbar"><button id="play">▶ ${t('play')}</button><button id="replay">↻ ${t('replay')}</button><span class="help">${t('playHint')}</span></div></div><div class="questions">${trial.questions.map(q=>`<fieldset><legend>${esc(t('questions')[q][0])}</legend><p class="question-desc">${esc(t('questions')[q][1])}</p><div class="choices">${['-2','-1','0','1','2','na'].map((v,i)=>`<label class="choice"><input type="radio" name="${q}" value="${v}" ${ratings[q]===v?'checked':''}><span>${t('options')[i]}</span></label>`).join('')}</div></fieldset>`).join('')}</div></div><div class="nav"><button id="back" ${index===0?'disabled':''}>← ${t('back')}</button><div class="nav-right"><span class="save-state" id="save-state">${t('draft')}</span><button id="next" class="primary">${t(index===39?'submit':'next')} →</button></div></div>`;
+ratingMatrix(trial);
 document.querySelectorAll('input[type=radio]').forEach(r=>r.onchange=()=>{ratings[r.name]=r.value;persist();});
 player=new PairedPlayer([...document.querySelectorAll('video')],(i,value)=>{coverage[i]=Math.max(coverage[i],value);if(coverage[i]>=.9)watched[i]=true;$('#watched-'+i).textContent=t(watched[i]?'watched':'unwatched');persist();},waiting=>{if($('#save-state')&&!busy)$('#save-state').textContent=t(waiting?'buffering':'draft');},()=>notice(t('videoError')));
 $('#play').onclick=toggle;$('#replay').onclick=()=>playBoth(true);$('#next').onclick=next;$('#back').onclick=()=>{persist();loadTrial(index-1);};
