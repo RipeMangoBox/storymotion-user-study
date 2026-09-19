@@ -8,6 +8,9 @@ with tempfile.TemporaryDirectory(prefix='study-v2-test-') as tmp:
  os.environ['STUDY_DATA']=str(data);os.environ['STUDY_TEST_KEY']='isolated-test-key'
  import server
  from analysis import export
+ expected={'given':{'mainline','ccd','dance','director'},'joint':{'mainline','pulp_dit','pulp_mar'}}
+ assert all(set(s['methods'])==expected[s['mode']] for s in server.CATALOG['samples'])
+ assert all(not any('gendop' in m.lower() for m in s['methods']) for s in server.CATALOG['samples'])
  client=TestClient(server.app)
  sessions=[];cells=collections.Counter();starts=[]
  assert client.post('/api/start',json={'language':'en','consent':True,'protocol_version':'paired-40-v2','test_mode':True}).status_code==403
@@ -51,6 +54,20 @@ with tempfile.TemporaryDirectory(prefix='study-v2-test-') as tmp:
  result=export(data,100);assert result['summary']['valid_human_participants']==2
  assert len(result['responses'])==320
  assert all(r['preference_including_ties']==.5 and r['conditional_win_excluding_ties'] is None for r in result['summary']['preferences'])
+ # The same method preference must score identically on either display side.
+ for outcome in ['win','loss']:
+  with server.connect() as c:
+   for session in c.execute("SELECT * FROM sessions WHERE submitted IS NOT NULL").fetchall():
+    for i,t in enumerate(json.loads(session['plan'])):
+     side=-1 if t['methods'][0]=='mainline' else 1
+     value=str(side if outcome=='win' else -2*side)
+     previous=json.loads(c.execute('SELECT ratings FROM answers WHERE session_id=? AND idx=?',(session['id'],i)).fetchone()[0])
+     c.execute('UPDATE answers SET ratings=? WHERE session_id=? AND idx=?',(json.dumps({q:value for q in previous}),session['id'],i))
+  scored=export(data,20)
+  assert all(r['preference_including_ties']==(1 if outcome=='win' else 0) for r in scored['summary']['preferences'])
+ with server.connect() as c:
+  for a in c.execute('SELECT session_id,idx,ratings FROM answers').fetchall():
+   c.execute('UPDATE answers SET ratings=? WHERE session_id=? AND idx=?',(json.dumps({q:'0' for q in json.loads(a['ratings'])}),a['session_id'],a['idx']))
  with server.connect() as c:c.execute("UPDATE answers SET ratings=replace(ratings, '\"0\"', '\"na\"')")
  result=export(data,50)
  assert all(r['preference_including_ties'] is None and r['NA_fraction']==1 for r in result['summary']['preferences'])
