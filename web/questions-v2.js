@@ -1,7 +1,7 @@
 window.STUDY_V2 = {
 zh:{
  participantLabel:'匿名参与者 ID',participantHelp:'请输入3–40位字母、数字、下划线或连字符，不要填写姓名或联系方式。',invalidId:'请先填写有效的匿名参与者 ID。',resumeTitle:'发现已保存的答卷',resumeAnswer:'继续此答卷',newParticipant:'新参与者 · 新建随机答卷',newConfirm:'新建答卷不会删除已保存的答案，但当前浏览器将切换到新答卷。继续吗？',
- flow:'共 40 组、200 项判断，预计约 20–30 分钟，实际用时因人而异。两个任务的先后顺序在参与者之间平衡分配；每组仅展示两个匿名方法。',
+ flow:'共 38 组、188 项判断，预计约 20–30 分钟，实际用时因人而异。两个任务的先后顺序在参与者之间平衡分配；每组仅展示两个匿名方法。',
  promptNote:'',
  givenScope:'请评价生成的相机。人物动作已给定。',
  jointScope:'请分别评价生成的人物动作与相机。',
@@ -27,7 +27,7 @@ zh:{
 },
 en:{
  participantLabel:'Anonymous participant ID',participantHelp:'Use 3–40 letters, numbers, underscores or hyphens. Do not enter your name or contact details.',invalidId:'Please enter a valid anonymous participant ID.',resumeTitle:'A saved response is available',resumeAnswer:'Continue this response',newParticipant:'New participant · New randomized response',newConfirm:'Saved answers will be retained, but this browser will switch to a new response. Continue?',
- flow:'40 comparisons and 200 judgments, approximately 20–30 minutes; actual completion time varies. Task order is counterbalanced across participants. Each trial shows two anonymous methods.',
+ flow:'38 comparisons and 188 judgments, approximately 20–30 minutes; actual completion time varies. Task order is counterbalanced across participants. Each trial shows two anonymous methods.',
  promptNote:'',
  givenScope:'Evaluate the generated camera. Human motion is supplied.',
  jointScope:'Evaluate generated human motion and camera separately.',
